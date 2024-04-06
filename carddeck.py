@@ -2,11 +2,12 @@ import random
 
 RED = 0;
 BLUE = 1;
-GREEN = 3;
-YELLOW = 4;
-WILD_COLOR = 5;
+GREEN = 2;
+YELLOW = 3;
+WILD_COLOR = 4;
 
 COLORS = [RED, BLUE, GREEN, YELLOW, WILD_COLOR]
+COLORNAMES = ["RED", "BLUE", "GREEN", "YELLOW", "WILD"]
 
 
 SKIP = 10;
@@ -16,8 +17,18 @@ DRAW_4 = 13;
 WILD_ACTION = 14;
 
 ACTIONS = [SKIP, REVERSE, DRAW_2, DRAW_4, WILD_ACTION]
+ACTIONNAMES = ["SKIP", "REVERSE", "+2", "+4", "WILD"]
 
+#Create a lookup to store the card names. 
 cardName = dict();
+for c in COLORS:
+    for v in range(10):
+        cardName[(c, v)] = str.format("{0} {1}", COLORNAMES[c], v);
+    for v in range (3):
+        cardName[(c, v + 10)] = str.format("{0} {1}", COLORNAMES[c], ACTIONNAMES[v]);
+cardName[(WILD_COLOR, WILD_ACTION)] = "WILD CARD";
+cardName[(WILD_COLOR, DRAW_4)] = "WILD +4";
+
 
 
 class Card:
@@ -26,11 +37,11 @@ class Card:
         self.color = color;
         self.value = value;
         
-    def isMatch(self, other):
-        return other.color >= WILD_COLOR or self.color == other.color or self.value == other.value;
+    def isMatch(self, cardOnTop):
+        return cardOnTop.color >= WILD_COLOR or self.color == cardOnTop.color or self.value == cardOnTop.value;
     
     def __str__(self) -> str:
-        return "{Color: " + str(self.color) + " Value: " + str(self.value) + "}";
+        return cardName[(self.color, self.value)];
     
     def __repr__(self) -> str:
         return self.__str__();
@@ -39,8 +50,9 @@ class Card:
 class CardDeck:
     
     def __init__(self):
+        if (CARDS == []): buildCards();
         self.drawPile = shuffle(CARDS);
-        self.discardPile = [];
+        self.discardPile = list[Card]();
         self.topCard = self.drawPile.pop();
         
     def drawCard(self) -> Card:
@@ -64,8 +76,8 @@ def shuffle(cards: list) -> list:
     cards = list(cards);
     
     while (len(cards) > 0):
-        rand = max(len(cards) - 1, int(random.random() * len(cards)));
-        ret.insert(rand, cards.pop());
+        rand = random.randrange(0, len(cards));
+        ret.append(cards.pop(rand));
     return ret;
     
     
@@ -103,7 +115,7 @@ def buildCards():
 #Test shuffling:
 test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 buildCards();
-#print(CARDS, shuffle(CARDS), sep="\n");
+print(CARDS, shuffle(CARDS), sep="\n\n");
 
 
     
