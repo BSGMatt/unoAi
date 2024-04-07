@@ -22,5 +22,5 @@ class Player:
         Force the player to pick between the given actions. 
     """
     
-    def forceAction(self, gameState, action: list[PlayerAction]) -> PlayerAction:
-        return self.agent.forceAction(self.id, gameState);
+    def forceAction(self, gameState, actions: list[PlayerAction]) -> PlayerAction:
+        return self.agent.forceAction(self.id, gameState, actions);

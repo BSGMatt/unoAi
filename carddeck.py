@@ -26,6 +26,8 @@ for c in COLORS:
         cardName[(c, v)] = str.format("{0} {1}", COLORNAMES[c], v);
     for v in range (3):
         cardName[(c, v + 10)] = str.format("{0} {1}", COLORNAMES[c], ACTIONNAMES[v]);
+    cardName[(c, WILD_ACTION)] = str.format("WILD CARD ({0})", COLORNAMES[c]);
+    cardName[(c, DRAW_4)] = str.format("DRAW +4 ({0})", COLORNAMES[c]);
 cardName[(WILD_COLOR, WILD_ACTION)] = "WILD CARD";
 cardName[(WILD_COLOR, DRAW_4)] = "WILD +4";
 

@@ -24,9 +24,14 @@ def main():
         
         for player in gameState.players:
             
-            print("\n");
-            print("Player", player.id);
-            print("\n");
+            if (player.id == gameState.whoseTurn):
+                print("");
+                print("It's Player ", player.id,"'s Turn!!", sep="");
+                print("");
+            else:
+                print("");
+                print("Player ", player.id,"'s Stats:", sep="");
+                print("");
             
             print("Top Card is a", gameState.deck.topCard);
             print("Your Hand:", player.cardsInHand);
@@ -47,16 +52,21 @@ def main():
                 else:
                     newCard = gameState.deck.drawCard();
                     gameState.players[gameState.whoseTurn].cardsInHand.append(newCard);
-                    
+                  
+              
+            if (action.actionName != 'None'):
+                gameState.lastPlayerAction[player.id] = action;
+
+        #Handle any events that have been triggered due to player actions.
+        for event in gameState.gameEvents:
+            if (event.eventOccured(gameState)):
+                event.modifyGameState(gameState);
+                
+
         gameState.nextPlayer();
+        print("Next player will be:", gameState.whoseTurn);
                     
     print("Thanks for playing!");
-    
-    
-    
-    
-
-
 
 if __name__ == "__main__":
     main();

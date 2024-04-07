@@ -2,6 +2,7 @@
 from carddeck import *
 from player import *
 from agents import *
+from gameevent import *
 
 class GameState:
     
@@ -20,14 +21,26 @@ class GameState:
         self.players = list[Player]();
         for i in range(numPlayers):
             self.players.append(Player(i, HumanAgent()));
+            
+        #A dictionary containing the last action each player performed.
+        self.lastPlayerAction = dict();
          
         #Hand out every player cards.    
-        for player in self.players:
-            
-            for k in range(numCardsAtStart):
-                print(player.id, k);
+        for k in range(numCardsAtStart):
+            for player in self.players:
+                #print(player.id, k);
                 player.cardsInHand.append(self.deck.drawCard());
+                
         
+        """
+            Set up the game events that can occur during play.
+            (Custom house rules would go here.)
+        """
+        standardEvents  = [SkipEvent(), WildEvent()]
+        houseRules = [];
+        
+        
+        self.gameEvents = standardEvents + houseRules;
         
         
     def getLegalActions(self, playerID: int) -> list[PlayerAction]:
