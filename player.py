@@ -24,3 +24,6 @@ class Player:
     
     def forceAction(self, gameState, actions: list[PlayerAction]) -> PlayerAction:
         return self.agent.forceAction(self.id, gameState, actions);
+    
+    def numCardsInHand(self):
+        return len(self.cardsInHand);

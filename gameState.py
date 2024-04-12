@@ -49,7 +49,11 @@ class GameState:
         
         if (playerID == self.whoseTurn):
             
-            ret.append(PlayerAction('draw', None))
+            ret.append(PlayerAction('draw', None));
+            
+            #If player is about to place their 2nd to last card. 
+            if (len(self.players[playerID].cardsInHand) == 2):
+                ret.append(PlayerAction('uno', None));
             
             #Run through each of player's card to see there's any match. 
             for card in self.players[playerID].cardsInHand:

@@ -42,9 +42,6 @@ class SkipEvent(GameEvent):
         print("SkipEvent - Next player will be", gameState.whoseTurn);
         self.eventComplete = True;
         
-    def getActions(self, gameState):
-        return []
-        
 class WildEvent(GameEvent):
     
     def __init__(self):
@@ -73,3 +70,40 @@ class WildEvent(GameEvent):
         
     def getActions(self, gameState):
         return [PlayerAction('Red', None), PlayerAction('Blue', None), PlayerAction('Green', None), PlayerAction('Yellow', None)]
+    
+class ReverseEvent(GameEvent):
+    
+    def eventOccured(self, gameState) -> bool:
+        return gameState.deck.topCard.value == REVERSE;
+    
+    def modifyGameState(self, gameState):
+        gameState.orderReversed = not(gameState.orderReversed);
+        
+class UnoCalledEvent(GameEvent):
+    
+    def eventOccured(self, gameState) -> bool:
+        return gameState.lastPlayerAction[gameState.whoseTurn].actionName == 'uno'
+    
+    """
+        Allow the active player to perform an action after calling UNO. 
+    """
+    def modifyGameState(self, gameState):
+        player = gameState.players[gameState.whoseTurn];
+        action = player.forceAction(gameState, self.getActions(gameState));
+        
+        if action.actionName == 'place':
+            player.cardsInHand.remove(action.card);
+            gameState.deck.placeCard(action.card);
+            gameState.lastPlayerAction[gameState.whoseTurn] = action;  
+            gameState.lastPlayerAction[player.id] = action;
+        else :
+            print("You must place down a card!");
+            
+                 
+            
+    #Get normal actions, excluding DRAW or UNO. 
+    def getActions(self, gameState):
+        playerActions = gameState.getLegalActions(gameState.whoseTurn);
+        return [action for action in playerActions if action.actionName != "Uno" or action.actionName != "Draw"]
+        
+        
