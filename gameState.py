@@ -3,6 +3,7 @@ from carddeck import *
 from player import *
 from agents import *
 from gameevent import *
+from actions import PlayerActionNames
 
 class GameState:
     
@@ -36,9 +37,9 @@ class GameState:
             Set up the game events that can occur during play.
             (Custom house rules would go here.)
         """
-        standardEvents  = [SkipEvent(), WildEvent()]
+        #standardEvents  = [UnoCalledEvent(), DrawCardEvent(), PlaceCardEvent(), SkipEvent(), WildEvent()]
+        standardEvents = [DrawCardEvent(), PlaceCardEvent()]
         houseRules = [];
-        
         
         self.gameEvents = standardEvents + houseRules;
         
@@ -48,17 +49,23 @@ class GameState:
         ret = [];
         
         if (playerID == self.whoseTurn):
-            
-            ret.append(PlayerAction('draw', None));
-            
-            #If player is about to place their 2nd to last card. 
-            if (len(self.players[playerID].cardsInHand) == 2):
-                ret.append(PlayerAction('uno', None));
+            ret.append(PlayerAction(PlayerActionNames.DRAW, None));
             
             #Run through each of player's card to see there's any match. 
             for card in self.players[playerID].cardsInHand:
                 if (self.deck.topCard.isMatch(card)):
-                    ret.append(PlayerAction('place', card));
+                    ret.append(PlayerAction(PlayerActionNames.PLACE, card));
+            
+            #Check if a player is on their second to last card. 
+            if (len(self.players[playerID].cardsInHand) == 2):
+                ret.append(PlayerAction(PlayerActionNames.UNO, None));
+                    
+        else:
+            #Check if other players are about to place their 2nd to last card. 
+            for player in self.players:
+                if (player.id != playerID and len(self.players[player.id].cardsInHand) == 2):
+                    ret.append(PlayerAction(PlayerActionNames.UNO, None));
+                    break; #Only need one uno action. 
                 
         return ret;
     

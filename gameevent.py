@@ -1,5 +1,6 @@
 from carddeck import *
 from player import Player, PlayerAction
+from actions import PlayerActionNames as pan
 
 """
     Some cards can cause events that can change the state of the 
@@ -20,6 +21,7 @@ class GameEvent:
     def __init__(self):
         self.enforced = False
         self.eventComplete = False
+        self.name = "Generic Event"
         pass
     
     def eventOccured(self, gameState) -> bool:
@@ -31,11 +33,43 @@ class GameEvent:
     def getActions(self, gameState):
         return []
     
+class DrawCardEvent(GameEvent):
+    
+    def __init__(self):
+        super().__init__()
+        self.name = "Draw Card Event"
+        
+    def eventOccured(self, gameState) -> bool:
+        #print(gameState.lastPlayerAction[gameState.whoseTurn]);
+        return gameState.lastPlayerAction[gameState.whoseTurn].actionName == pan.DRAW;
+    
+    def modifyGameState(self, gameState):
+        newCard = gameState.deck.drawCard();
+        gameState.players[gameState.whoseTurn].cardsInHand.append(newCard);
+        
+class PlaceCardEvent(GameEvent):
+    
+    def __init__(self):
+        super().__init__()
+        self.name = "Place Card Event"
+        
+    def eventOccured(self, gameState) -> bool:
+        return gameState.lastPlayerAction[gameState.whoseTurn].actionName == pan.PLACE;
+    
+    def modifyGameState(self, gameState):
+        player = gameState.players[gameState.whoseTurn];
+        player.cardsInHand.remove(gameState.lastPlayerAction[player.id].card);
+        gameState.deck.placeCard(gameState.lastPlayerAction[player.id].card);
+    
 class SkipEvent(GameEvent):
+    
+    def __init__(self):
+        super().__init__()
+        self.name = "Skip Event"
     
     def eventOccured(self, gameState) -> bool:
         print("TopCard Value:", gameState.deck.topCard.value);
-        return gameState.deck.topCard.value == SKIP;
+        return gameState.lastPlayerAction[gameState.whoseTurn].card.value == SKIP;
     
     def modifyGameState(self, gameState):
         gameState.nextPlayer(0);
@@ -47,6 +81,7 @@ class WildEvent(GameEvent):
     def __init__(self):
         super().__init__();
         self.enforced = True
+        self.name = "Wild Event"
     
     def eventOccured(self, gameState) -> bool:
         return gameState.deck.topCard.color == WILD_COLOR;
@@ -73,37 +108,65 @@ class WildEvent(GameEvent):
     
 class ReverseEvent(GameEvent):
     
+    def __init__(self):
+        super().__init__()
+        self.name = "Reverse Event"
+    
     def eventOccured(self, gameState) -> bool:
         return gameState.deck.topCard.value == REVERSE;
     
     def modifyGameState(self, gameState):
         gameState.orderReversed = not(gameState.orderReversed);
         
+
 class UnoCalledEvent(GameEvent):
     
+    def __init__(self):
+        super().__init__();
+        self.playerWhoCalledId = -1
+        self.name = "Uno Called Event"
+    
     def eventOccured(self, gameState) -> bool:
-        return gameState.lastPlayerAction[gameState.whoseTurn].actionName == 'uno'
+        
+        for player in gameState.players:
+            if (gameState.lastPlayerAction[player.id].actionName == pan.UNO):
+                self.playerWhoCalledId = player.id
+                return True;
+        
+        return False;
     
     """
-        Allow the active player to perform an action after calling UNO. 
+        If the player who called UNO was the current player:
+        
     """
     def modifyGameState(self, gameState):
-        player = gameState.players[gameState.whoseTurn];
-        action = player.forceAction(gameState, self.getActions(gameState));
         
-        if action.actionName == 'place':
-            player.cardsInHand.remove(action.card);
-            gameState.deck.placeCard(action.card);
-            gameState.lastPlayerAction[gameState.whoseTurn] = action;  
-            gameState.lastPlayerAction[player.id] = action;
-        else :
-            print("You must place down a card!");
-            
-                 
+        print("")
+        print("Player", self.playerWhoCalledId,"called UNO!")
+        print("")
+        
+        currentPlayer = gameState.players[gameState.whoseTurn];
+        
+        #Uno was called by current player. Let them place a card. 
+        if (self.playerWhoCalledId == currentPlayer.id):
+            action = currentPlayer.forceAction(gameState, self.getActions(gameState));
+            if action.actionName == pan.PLACE:
+                currentPlayer.cardsInHand.remove(action.card);
+                gameState.deck.placeCard(action.card);
+                gameState.lastPlayerAction[gameState.whoseTurn] = action;  
+                gameState.lastPlayerAction[currentPlayer.id] = action;
+            else :
+                print("You must place down a card!");   
+        elif (self.playerWhoCalledId != -1):
+            #Someone else called uno before current player. Current player must draw 2 cards.
+            newCard = gameState.deck.drawCard();
+            currentPlayer.cardsInHand.append(newCard);
+            newCard = gameState.deck.drawCard();
+            currentPlayer.cardsInHand.append(newCard); 
             
     #Get normal actions, excluding DRAW or UNO. 
     def getActions(self, gameState):
         playerActions = gameState.getLegalActions(gameState.whoseTurn);
-        return [action for action in playerActions if action.actionName != "Uno" or action.actionName != "Draw"]
+        return [action for action in playerActions if action.actionName == pan.PLACE]
         
         

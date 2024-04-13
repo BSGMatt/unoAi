@@ -57,10 +57,14 @@ class CardDeck:
         self.discardPile = list[Card]();
         self.topCard = self.drawPile.pop();
         
+        #Pick a random color if the card is a wild or wild +4. 
+        if (self.topCard.color == WILD_COLOR):
+            self.topCard.color = random.choice(COLORS[0:-1]);
+        
     def drawCard(self) -> Card:
         card = self.drawPile.pop();
         if (len(self.drawPile) == 0):
-            self.drawPile = shuffle(self.discardPile);
+            self.drawPile = shuffle(CARDS);
             
         return card;
             

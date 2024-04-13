@@ -1,25 +1,43 @@
 
 from gameState import GameState
+from actions import PlayerActionNames as Actions
 from player import *
+import sys
 
+"""
 DRAW = "draw"
 PLACE = "place"
 UNO = "uno"
 NONE = "none"
-    
+""" 
 
 def main():
     
     print("Welcome to UNO AI Version 0.0!");
     
-    gameState = GameState();
+    #Process command line args. 
+    
+    args = sys.argv;
+    numCards = 7;
+    
+    for i in range(len(args)):
+        if (args[i] == '--numCards'):
+            if (i + 1 >= len(args)):
+                print("Need to specify --numCards! (i.e, --numCards 7)");
+                sys.exit();
+            else:
+                numCards = int(args[i + 1]);
+        
+    
+    gameState = GameState(numCardsAtStart=numCards);
     
     while (not(gameState.isTerminalState())):
         
         """
-            To make implementing rules like Calling "Uno" or Jump-In's easier, 
-            player's perform actions in a more "asynchronous" manner. Players 
-            can perform actions regardless of whose turn it is. 
+            To make make events like calling "UNO" or "Jump-In's" easier, I plan to implement
+            multhreading down the line. For now, we're using a psuedo-multithreading approach where
+            each player can have a set of actions they can take wether it's their turn or not, just with 
+            a predefined order. 
         """
         
         for player in gameState.players:
@@ -37,29 +55,13 @@ def main():
             print("Your Hand:", player.cardsInHand);
             
             action = player.makeAction(gameState);
+            gameState.lastPlayerAction[player.id] = action;
             
-            if action.actionName == PLACE:
-                player.cardsInHand.remove(action.card);
-                gameState.deck.placeCard(action.card);
-                gameState.lastPlayerAction[player.id] = action;
-            elif action.actionName == DRAW:
-                newCard = gameState.deck.drawCard();
-                player.cardsInHand.append(newCard);
-                gameState.lastPlayerAction[player.id] = action;
-            elif action.actionName == UNO:
-                #If the active player is calling UNO
-                if (gameState.whoseTurn == player.id):
-                    newCard = gameState.deck.drawCard();
-                    player.cardsInHand.append(newCard);
-                    gameState.lastPlayerAction[player.id] = action;
-                else:
-                    newCard = gameState.deck.drawCard();
-                    gameState.players[gameState.whoseTurn].cardsInHand.append(newCard);
-                    gameState.lastPlayerAction[player.id] = action;
 
         #Handle any events that have been triggered due to player actions.
         for event in gameState.gameEvents:
             if (event.eventOccured(gameState)):
+                print ("A", event.name, "has occured!");
                 event.modifyGameState(gameState);
                 
 

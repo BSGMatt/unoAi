@@ -2,9 +2,11 @@ from playeraction import PlayerAction
 
 class Agent:
     
+    #Returns the agent's best action. 
     def getAction(self, playerID: int, gameState):
         pass
     
+    #Make the agent select between a set of predefined options. 
     def forceAction(self, playerID: int, gameState, actions: list[PlayerAction]):
         pass
     
