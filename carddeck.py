@@ -51,10 +51,18 @@ class Card:
 
 class CardDeck:
     
-    def __init__(self, wilds=True):
+    def __init__(self, standardDeck=True, wilds=False, skipsOnly=False, reversesOnly=False, draw2s=False):
+        
+        self.standardDeck = standardDeck;
+        self.wilds = wilds;
+        self.skipsOnly = skipsOnly;
+        self.reversesOnly = reversesOnly;
+        self.draw2s = draw2s;
+        
         print("CardDeck", wilds);
-        if (CARDS == []): self.buildCards(wilds);
+        if (CARDS == []): self.buildCards(standardDeck=standardDeck, wilds=wilds, skipsOnly=skipsOnly, reversesOnly=reversesOnly, draw2s=draw2s);
         self.drawPile = shuffle(CARDS);
+        print(CARDS);
         self.discardPile = list[Card]();
         self.topCard = self.drawPile.pop();
         
@@ -65,6 +73,8 @@ class CardDeck:
     def drawCard(self) -> Card:
         card = self.drawPile.pop();
         if (len(self.drawPile) == 0):
+            #Reset the deck and re-shuffle
+            self.buildCards(standardDeck=self.standardDeck, wilds=self.wilds, skipsOnly=self.skipsOnly, reversesOnly=self.reversesOnly, draw2s=self.draw2s);
             self.drawPile = shuffle(CARDS);
             
         return card;
@@ -82,16 +92,48 @@ class CardDeck:
         return oldTopCard;
         
             
-    def buildCards(self, wilds=True): 
+    def buildCards(self, standardDeck=True, wilds=False, skipsOnly=False, reversesOnly=False, draw2s=False): 
     
         print("buildCards: ", wilds);
+        print("buildCards: ", skipsOnly);
         
-        #Build all of the colored cards
-        for color in COLORS[0:-1]:
-            for value in range (0, 13):
-                CARDS.append(Card(color, value));
-                if (value > 0):
+        if (standardDeck):
+            #Build all of the colored cards
+            for color in COLORS[0:-1]:
+                for value in range (0, 13):
                     CARDS.append(Card(color, value));
+                    if (value > 0):
+                        CARDS.append(Card(color, value));
+                        
+            #Wilds and Draw 4's
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            return;
+        
+        #A deck of only skips (Used for testing)
+        if (skipsOnly):
+            for color in COLORS[0:-1]:
+                CARDS.append(Card(color, SKIP));
+                CARDS.append(Card(color, SKIP));
+            return;
+                
+        if (reversesOnly):
+            for color in COLORS[0:-1]:
+                CARDS.append(Card(color, REVERSE));
+                CARDS.append(Card(color, REVERSE));
+            return;
+        
+        if (draw2s):
+            for color in COLORS[0:-1]:
+                CARDS.append(Card(color, DRAW_2));
+                CARDS.append(Card(color, DRAW_2));
+            return;
                     
         if (wilds):
             #Wilds and Draw 4's
@@ -103,6 +145,15 @@ class CardDeck:
             CARDS.append(Card(WILD_COLOR, DRAW_4));
             CARDS.append(Card(WILD_COLOR, DRAW_4));
             CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            return;
         
     
 def shuffle(cards: list) -> list:

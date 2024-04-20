@@ -19,7 +19,8 @@ def main():
     
     args = sys.argv;
     numCards = 7;
-    wilds = True;
+    numPlayers = 2;
+    deckType = 0;
     
     for i in range(len(args)):
         if (args[i] == '--numCards'):
@@ -28,21 +29,28 @@ def main():
                 sys.exit();
             else:
                 numCards = int(args[i + 1]);
-        elif (args[i] == '--wilds'):
+        elif (args[i] == '--deckType'):
             if (i + 1 >= len(args)):
                 print("Need to specify --wilds! (i.e, --wilds 0)");
                 sys.exit();
             else:
-                wildsVal = int(args[i + 1]);
-                if (wildsVal >= 1):
-                    wilds = True;
-                else:
-                    wilds = False;
+                """
+                    0 for standard deck
+                    1 for wilds and wild +4's only
+                    2 for skips only
+                    3 for reverses only
+                    4 for draw 2's only
+                """
+                deckType = int(args[i + 1]);
+        if (args[i] == '--numPlayers'):
+            if (i + 1 >= len(args)):
+                print("Need to specify --numPlayers! (i.e, --numPlayers 4)");
+                sys.exit();
+            else:
+                numPlayers = int(args[i + 1]);
             
-        
-    print(wilds);
     
-    gameState = GameState(numCardsAtStart=numCards, wildsInDeck=wilds);
+    gameState = GameState(numCardsAtStart=numCards, numPlayers=numPlayers, deckOptions=deckType);
     
     while (not(gameState.isTerminalState())):
         
@@ -65,7 +73,7 @@ def main():
                 print("");
             
             print("Top Card is a", gameState.deck.topCard);
-            print("Your Hand:", player.cardsInHand);
+            print("Player", player.id,"'s Hand:", player.cardsInHand);
             
             action = player.makeAction(gameState);
             gameState.lastPlayerAction[player.id] = action;
@@ -76,13 +84,23 @@ def main():
             if (not(event.ignore) and event.eventOccured(gameState)):
                 print ("A", event.name, "has occured!");
                 event.modifyGameState(gameState);
-            event.ignore = True;
+            event.ignore = False;
                 
 
         gameState.nextPlayer();
         print("Next player will be:", gameState.whoseTurn);
                     
+    logResults(gameState);                
+    
     print("Thanks for playing!");
+    
+def logResults(gameState: GameState):
+    
+    for player in gameState.players:
+        if (len(player.cardsInHand) == 0):
+            print("Player %d wins!" % (player.id))
+        else:
+            print("Player %d had %d cards left!" % (player.id, len(player.cardsInHand)))
 
 if __name__ == "__main__":
     main();

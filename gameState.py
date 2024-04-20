@@ -5,12 +5,27 @@ from agents import *
 from gameevent import *
 from actions import PlayerActionNames
 
+#List Deck options
+STANDARD_DECK = 0;
+WILDS_ONLY_DECK = 1;
+SKIPS_ONLY_DECK = 2;
+REVERSES_ONLY_DECK = 3;
+DRAW_2_ONLY_DECK = 4;
+
 class GameState:
     
-    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7, wildsInDeck=True):
+    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7, deckOptions=0):
         
-        #Initialize the card deck. 
-        self.deck = CardDeck(wildsInDeck);
+        if (deckOptions == WILDS_ONLY_DECK):
+            self.deck = CardDeck(standardDeck=False, wilds=True);
+        elif (deckOptions == SKIPS_ONLY_DECK):
+            self.deck = CardDeck(standardDeck=False, reversesOnly=True);
+        elif (deckOptions == REVERSES_ONLY_DECK):
+            self.deck = CardDeck(standardDeck=False, skipsOnly=True);
+        elif (deckOptions == DRAW_2_ONLY_DECK):
+            self.deck = CardDeck(standardDeck=False, draw2s=True);
+        else:
+            self.deck = CardDeck();
         
         #The id of the player whose turn it is. 
         self.whoseTurn = 0;
@@ -38,7 +53,7 @@ class GameState:
             (Custom house rules would go here.)
         """
         #standardEvents  = [UnoCalledEvent(), DrawCardEvent(), PlaceCardEvent(), SkipEvent(), WildEvent()]
-        standardEvents = [UnoCalledEvent(0), DrawCardEvent(1), PlaceCardEvent(2)]
+        standardEvents = [UnoCalledEvent(0), DrawCardEvent(1), PlaceCardEvent(2), SkipEvent(3), ReverseEvent(4), Draw2Event(5), Draw4Event(6), WildEvent(7)]
         houseRules = [];
         
         self.gameEvents = standardEvents + houseRules;
@@ -46,7 +61,7 @@ class GameState:
         
     def getLegalActions(self, playerID: int) -> list[PlayerAction]:
         
-        ret = [PlayerAction(PlayerActionNames.NONE, None)];
+        ret = [];
         
         if (playerID == self.whoseTurn):
             ret.append(PlayerAction(PlayerActionNames.DRAW, None));
@@ -69,6 +84,10 @@ class GameState:
                 if (player.id != playerID and self.playerisReadyToCallUNO(player.id)):
                     ret.append(PlayerAction(PlayerActionNames.UNO, None));
                     break; #Only need one uno action. 
+        
+        #If there is no possible actions a player can take, then return the 'None' Action.        
+        if (len(ret) == 0):
+            ret = [PlayerAction(PlayerActionNames.NONE, None)];
                 
         return ret;
     
@@ -82,7 +101,7 @@ class GameState:
         return False;
     
     """
-        Gets the next player in the turn order. 
+        Moves to the next player in the turn order. 
         skips - How many players to skip. 
     """
     def nextPlayer(self, skips=0):
@@ -90,6 +109,19 @@ class GameState:
             self.whoseTurn = (self.whoseTurn - 1 - skips) % len(self.players);
         else:
             self.whoseTurn = (self.whoseTurn + 1 + skips) % len(self.players);
+    
+    """
+        Gets the ID of the next player in the turn order.
+        skips - How many players to skip. 
+    """      
+    def getNextPlayer(self):
+        
+        if (self.orderReversed):
+            return (self.whoseTurn - 1) % len(self.players);
+        else:
+            return (self.whoseTurn + 1) % len(self.players);
+            
+    
             
     def cancelFutureEvents(self, startEvent: GameEvent):
         
@@ -101,6 +133,11 @@ class GameState:
         for event in self.gameEvents:
             if (event.name == eventName):
                 event.ignore = True;
+                
+    def getEvent(self, eventName: str) -> GameEvent:
+        for event in self.gameEvents:
+            if (event.name == eventName):
+                return event;
             
     #Check if any players' hands are empty. 
     def isTerminalState(self) -> bool:

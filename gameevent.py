@@ -61,7 +61,7 @@ class PlaceCardEvent(GameEvent):
     
     def modifyGameState(self, gameState):
         player = gameState.players[gameState.whoseTurn];
-        print("Player", gameState.whoseTurn, "'s deck", player.cardsInHand);
+        #print("Player", gameState.whoseTurn, "'s deck", player.cardsInHand);
         player.cardsInHand.remove(gameState.lastPlayerAction[player.id].card);
         gameState.deck.placeCard(gameState.lastPlayerAction[player.id].card);
     
@@ -72,13 +72,14 @@ class SkipEvent(GameEvent):
         self.name = "Skip Event"
     
     def eventOccured(self, gameState) -> bool:
-        print("TopCard Value:", gameState.deck.topCard.value);
-        return gameState.lastPlayerAction[gameState.whoseTurn].card.value == SKIP;
+        #print("TopCard Value:", gameState.deck.topCard.value);
+        return gameState.lastPlayerAction[gameState.whoseTurn].card != None and gameState.lastPlayerAction[gameState.whoseTurn].card.value == SKIP;
     
     def modifyGameState(self, gameState):
         gameState.nextPlayer(0);
-        print("SkipEvent - Next player will be", gameState.whoseTurn);
+        #print("SkipEvent - Next player will be", gameState.whoseTurn);
         self.eventComplete = True;
+        gameState.cancelFutureEvents(self);
         
 class WildEvent(GameEvent):
     
@@ -88,7 +89,8 @@ class WildEvent(GameEvent):
         self.name = "Wild Event"
     
     def eventOccured(self, gameState) -> bool:
-        return gameState.deck.topCard.color == WILD_COLOR;
+        card = gameState.lastPlayerAction[gameState.whoseTurn].card;
+        return card != None and card.color == WILD_COLOR;
     
     def modifyGameState(self, gameState):
         player = gameState.players[gameState.whoseTurn];
@@ -117,10 +119,18 @@ class ReverseEvent(GameEvent):
         self.name = "Reverse Event"
     
     def eventOccured(self, gameState) -> bool:
-        return gameState.deck.topCard.value == REVERSE;
+        return gameState.lastPlayerAction[gameState.whoseTurn].card != None and gameState.lastPlayerAction[gameState.whoseTurn].card.value == REVERSE;
     
     def modifyGameState(self, gameState):
-        gameState.orderReversed = not(gameState.orderReversed);
+        
+        #If the game has less than 2 people, then a reverse is just a skip. 
+        
+        if (len(gameState.players) == 2):
+            gameState.nextPlayer();
+        else:
+            gameState.orderReversed = not(gameState.orderReversed);
+        
+        gameState.cancelFutureEvents(self);
         
 
 class UnoCalledEvent(GameEvent):
@@ -173,5 +183,70 @@ class UnoCalledEvent(GameEvent):
     def getActions(self, gameState):
         playerActions = gameState.getLegalActions(gameState.whoseTurn);
         return [action for action in playerActions if action.actionName == pan.PLACE]
+    
+class Draw2Event(GameEvent):
+    
+    def __init__(self, order):
+        super().__init__(order)
+        self.name = "Draw 2 Event"
+    
+    def eventOccured(self, gameState) -> bool:
+        card = gameState.lastPlayerAction[gameState.whoseTurn].card;
+        return card != None and card.value == DRAW_2;
+    
+    def modifyGameState(self, gameState):
         
+        #Make the next player draw two cards. 
+        nextPlayer = gameState.players[gameState.getNextPlayer()];
+        newCard = gameState.deck.drawCard();
+        nextPlayer.cardsInHand.append(newCard);
+        newCard = gameState.deck.drawCard();
+        nextPlayer.cardsInHand.append(newCard);
         
+        #Skip their turn.  
+        gameState.nextPlayer(0);
+        gameState.cancelFutureEvents(self);
+        
+class Draw4Event(GameEvent):
+    
+    def __init__(self, order):
+        super().__init__(order)
+        self.name = "Draw 4 Event"
+    
+    def eventOccured(self, gameState) -> bool:
+        card = gameState.lastPlayerAction[gameState.whoseTurn].card;
+        return card != None and card.value == DRAW_4;
+    
+    def modifyGameState(self, gameState):
+        
+        #Make the next player draw four cards. 
+        nextPlayer = gameState.players[gameState.getNextPlayer()];
+        newCard = gameState.deck.drawCard();
+        nextPlayer.cardsInHand.append(newCard);
+        newCard = gameState.deck.drawCard();
+        nextPlayer.cardsInHand.append(newCard);
+        newCard = gameState.deck.drawCard();
+        nextPlayer.cardsInHand.append(newCard);
+        newCard = gameState.deck.drawCard();
+        nextPlayer.cardsInHand.append(newCard);
+        
+        player = gameState.players[gameState.whoseTurn];
+        playerAction = player.forceAction(gameState, self.getActions(gameState));
+        if (playerAction.actionName == 'Red'):
+            gameState.deck.topCard.color = RED;
+        elif (playerAction.actionName == 'Blue'):
+            gameState.deck.topCard.color = BLUE;
+        elif (playerAction.actionName == 'Green'):
+            gameState.deck.topCard.color = GREEN;
+        elif (playerAction.actionName == 'Yellow'):
+            gameState.deck.topCard.color = YELLOW;
+        else:
+            print("Invalid color choice receieved! Picking Random Color.")
+            gameState.deck.topCard.color = random.choice([RED, BLUE, GREEN, YELLOW]);
+        
+        #Skip their turn.  
+        gameState.nextPlayer(0);
+        gameState.cancelFutureEvents(self);
+        
+    def getActions(self, gameState):
+        return [PlayerAction('Red', None), PlayerAction('Blue', None), PlayerAction('Green', None), PlayerAction('Yellow', None)]
