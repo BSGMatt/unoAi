@@ -18,10 +18,12 @@ class GameEvent:
         provided. 
     """
     
-    def __init__(self):
+    def __init__(self, order):
+        self.order = order;
         self.enforced = False
         self.eventComplete = False
         self.name = "Generic Event"
+        self.ignore = False
         pass
     
     def eventOccured(self, gameState) -> bool:
@@ -35,8 +37,8 @@ class GameEvent:
     
 class DrawCardEvent(GameEvent):
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, order):
+        super().__init__(order)
         self.name = "Draw Card Event"
         
     def eventOccured(self, gameState) -> bool:
@@ -49,22 +51,24 @@ class DrawCardEvent(GameEvent):
         
 class PlaceCardEvent(GameEvent):
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, order):
+        super().__init__(order)
         self.name = "Place Card Event"
         
     def eventOccured(self, gameState) -> bool:
+        print("Action", gameState.lastPlayerAction[gameState.whoseTurn]);
         return gameState.lastPlayerAction[gameState.whoseTurn].actionName == pan.PLACE;
     
     def modifyGameState(self, gameState):
         player = gameState.players[gameState.whoseTurn];
+        print("Player", gameState.whoseTurn, "'s deck", player.cardsInHand);
         player.cardsInHand.remove(gameState.lastPlayerAction[player.id].card);
         gameState.deck.placeCard(gameState.lastPlayerAction[player.id].card);
     
 class SkipEvent(GameEvent):
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, order):
+        super().__init__(order)
         self.name = "Skip Event"
     
     def eventOccured(self, gameState) -> bool:
@@ -78,8 +82,8 @@ class SkipEvent(GameEvent):
         
 class WildEvent(GameEvent):
     
-    def __init__(self):
-        super().__init__();
+    def __init__(self, order):
+        super().__init__(order);
         self.enforced = True
         self.name = "Wild Event"
     
@@ -108,8 +112,8 @@ class WildEvent(GameEvent):
     
 class ReverseEvent(GameEvent):
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, order):
+        super().__init__(order)
         self.name = "Reverse Event"
     
     def eventOccured(self, gameState) -> bool:
@@ -121,8 +125,8 @@ class ReverseEvent(GameEvent):
 
 class UnoCalledEvent(GameEvent):
     
-    def __init__(self):
-        super().__init__();
+    def __init__(self, order):
+        super().__init__(order);
         self.playerWhoCalledId = -1
         self.name = "Uno Called Event"
     
@@ -151,18 +155,19 @@ class UnoCalledEvent(GameEvent):
         if (self.playerWhoCalledId == currentPlayer.id):
             action = currentPlayer.forceAction(gameState, self.getActions(gameState));
             if action.actionName == pan.PLACE:
-                currentPlayer.cardsInHand.remove(action.card);
-                gameState.deck.placeCard(action.card);
-                gameState.lastPlayerAction[gameState.whoseTurn] = action;  
-                gameState.lastPlayerAction[currentPlayer.id] = action;
+                gameState.lastPlayerAction[currentPlayer.id] = action;  
             else :
-                print("You must place down a card!");   
+                print("You must place down a card!");  
+             
         elif (self.playerWhoCalledId != -1):
             #Someone else called uno before current player. Current player must draw 2 cards.
             newCard = gameState.deck.drawCard();
             currentPlayer.cardsInHand.append(newCard);
             newCard = gameState.deck.drawCard();
             currentPlayer.cardsInHand.append(newCard); 
+            
+            #Prevent any events from occuring after uno has been called. 
+            gameState.cancelFutureEvents(self);
             
     #Get normal actions, excluding DRAW or UNO. 
     def getActions(self, gameState):

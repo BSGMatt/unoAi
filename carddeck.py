@@ -51,8 +51,9 @@ class Card:
 
 class CardDeck:
     
-    def __init__(self):
-        if (CARDS == []): buildCards();
+    def __init__(self, wilds=True):
+        print("CardDeck", wilds);
+        if (CARDS == []): self.buildCards(wilds);
         self.drawPile = shuffle(CARDS);
         self.discardPile = list[Card]();
         self.topCard = self.drawPile.pop();
@@ -74,6 +75,34 @@ class CardDeck:
             self.topCard = card;
         else:
             print("ILLEGAL MOVE");
+            
+    def undoLastPlace(self) -> Card:
+        oldTopCard = self.topCard;
+        self.topCard = self.discardPile.pop();
+        return oldTopCard;
+        
+            
+    def buildCards(self, wilds=True): 
+    
+        print("buildCards: ", wilds);
+        
+        #Build all of the colored cards
+        for color in COLORS[0:-1]:
+            for value in range (0, 13):
+                CARDS.append(Card(color, value));
+                if (value > 0):
+                    CARDS.append(Card(color, value));
+                    
+        if (wilds):
+            #Wilds and Draw 4's
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, WILD_ACTION));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
+            CARDS.append(Card(WILD_COLOR, DRAW_4));
         
     
 def shuffle(cards: list) -> list:
@@ -94,34 +123,10 @@ CARDS = [];
 #Builds the card deck based on this 
 #image: https://en.wikipedia.org/wiki/Uno_(card_game)#/media/File:UNO_cards_deck.svg
 
-def buildCards(): 
-    
-    #Build all of the colored cards
-    for color in COLORS[0:-1]:
-        for value in range (0, 13):
-            CARDS.append(Card(color, value));
-            if (value > 0):
-                CARDS.append(Card(color, value));
-    
-    #Wilds and Draw 4's
-    CARDS.append(Card(WILD_COLOR, WILD_ACTION));
-    CARDS.append(Card(WILD_COLOR, WILD_ACTION));
-    CARDS.append(Card(WILD_COLOR, WILD_ACTION));
-    CARDS.append(Card(WILD_COLOR, WILD_ACTION));
-    CARDS.append(Card(WILD_COLOR, DRAW_4));
-    CARDS.append(Card(WILD_COLOR, DRAW_4));
-    CARDS.append(Card(WILD_COLOR, DRAW_4));
-    CARDS.append(Card(WILD_COLOR, DRAW_4));
+
     
     #print("CARDS,", CARDS)
             
-
-
-
-#Test shuffling:
-test = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-buildCards();
-print(CARDS, shuffle(CARDS), sep="\n\n");
 
 
     

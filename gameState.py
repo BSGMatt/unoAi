@@ -7,10 +7,10 @@ from actions import PlayerActionNames
 
 class GameState:
     
-    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7):
+    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7, wildsInDeck=True):
         
         #Initialize the card deck. 
-        self.deck = CardDeck();
+        self.deck = CardDeck(wildsInDeck);
         
         #The id of the player whose turn it is. 
         self.whoseTurn = 0;
@@ -38,7 +38,7 @@ class GameState:
             (Custom house rules would go here.)
         """
         #standardEvents  = [UnoCalledEvent(), DrawCardEvent(), PlaceCardEvent(), SkipEvent(), WildEvent()]
-        standardEvents = [DrawCardEvent(), PlaceCardEvent()]
+        standardEvents = [UnoCalledEvent(0), DrawCardEvent(1), PlaceCardEvent(2)]
         houseRules = [];
         
         self.gameEvents = standardEvents + houseRules;
@@ -46,7 +46,7 @@ class GameState:
         
     def getLegalActions(self, playerID: int) -> list[PlayerAction]:
         
-        ret = [];
+        ret = [PlayerAction(PlayerActionNames.NONE, None)];
         
         if (playerID == self.whoseTurn):
             ret.append(PlayerAction(PlayerActionNames.DRAW, None));
@@ -58,16 +58,28 @@ class GameState:
             
             #Check if a player is on their second to last card. 
             if (len(self.players[playerID].cardsInHand) == 2):
-                ret.append(PlayerAction(PlayerActionNames.UNO, None));
+                cards = self.players[playerID].cardsInHand
+                #Check if the last any of last two cards are a match. 
+                if (self.deck.topCard.isMatch(cards[0]) or self.deck.topCard.isMatch(cards[1])):
+                    ret.append(PlayerAction(PlayerActionNames.UNO, None));
                     
         else:
-            #Check if other players are about to place their 2nd to last card. 
+            #Check if other players are going to call UNO.  
             for player in self.players:
-                if (player.id != playerID and len(self.players[player.id].cardsInHand) == 2):
+                if (player.id != playerID and self.playerisReadyToCallUNO(player.id)):
                     ret.append(PlayerAction(PlayerActionNames.UNO, None));
                     break; #Only need one uno action. 
                 
         return ret;
+    
+    def playerisReadyToCallUNO(self, playerID):
+        #Check if a player is on their second to last card. 
+        if (len(self.players[playerID].cardsInHand) == 2):
+            cards = self.players[playerID].cardsInHand
+            #Check if the last any of last two cards are a match. 
+            if (self.deck.topCard.isMatch(cards[0]) or self.deck.topCard.isMatch(cards[1])):
+                return True;
+        return False;
     
     """
         Gets the next player in the turn order. 
@@ -78,6 +90,17 @@ class GameState:
             self.whoseTurn = (self.whoseTurn - 1 - skips) % len(self.players);
         else:
             self.whoseTurn = (self.whoseTurn + 1 + skips) % len(self.players);
+            
+    def cancelFutureEvents(self, startEvent: GameEvent):
+        
+        for event in self.gameEvents:
+            if (event.order > startEvent.order):
+                event.ignore = True;
+                
+    def cancelEvent(self, eventName: str):
+        for event in self.gameEvents:
+            if (event.name == eventName):
+                event.ignore = True;
             
     #Check if any players' hands are empty. 
     def isTerminalState(self) -> bool:

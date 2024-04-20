@@ -19,6 +19,7 @@ def main():
     
     args = sys.argv;
     numCards = 7;
+    wilds = True;
     
     for i in range(len(args)):
         if (args[i] == '--numCards'):
@@ -27,9 +28,21 @@ def main():
                 sys.exit();
             else:
                 numCards = int(args[i + 1]);
+        elif (args[i] == '--wilds'):
+            if (i + 1 >= len(args)):
+                print("Need to specify --wilds! (i.e, --wilds 0)");
+                sys.exit();
+            else:
+                wildsVal = int(args[i + 1]);
+                if (wildsVal >= 1):
+                    wilds = True;
+                else:
+                    wilds = False;
+            
         
+    print(wilds);
     
-    gameState = GameState(numCardsAtStart=numCards);
+    gameState = GameState(numCardsAtStart=numCards, wildsInDeck=wilds);
     
     while (not(gameState.isTerminalState())):
         
@@ -60,9 +73,10 @@ def main():
 
         #Handle any events that have been triggered due to player actions.
         for event in gameState.gameEvents:
-            if (event.eventOccured(gameState)):
+            if (not(event.ignore) and event.eventOccured(gameState)):
                 print ("A", event.name, "has occured!");
                 event.modifyGameState(gameState);
+            event.ignore = True;
                 
 
         gameState.nextPlayer();

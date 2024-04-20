@@ -15,9 +15,6 @@ class HumanAgent(Agent):
     def getAction(self, playerID: int, gameState):
         playerActions = gameState.getLegalActions(playerID);
         
-        if (len(playerActions) == 0):
-            return PlayerAction('None', None);
-        
         print("Here's your possible actions: ");
         
         #Print out all of the player's actions. 
