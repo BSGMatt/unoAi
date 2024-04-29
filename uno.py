@@ -21,6 +21,8 @@ def main():
     numCards = 7;
     numPlayers = 2;
     deckType = 0;
+    agentMode = "";
+    gameMode = "";
     
     for i in range(len(args)):
         if (args[i] == '--numCards'):
@@ -48,9 +50,14 @@ def main():
                 sys.exit();
             else:
                 numPlayers = int(args[i + 1]);
-            
+        if (args[i] == '--gameMode'):
+            if (i + 1 >= len(args)):
+                print("Need to specify --gameMode! (i.e, --gameMode random or --gameMode minimax)");
+                sys.exit();
+            else:
+                gameMode = str(args[i+1])
     
-    gameState = GameState(numCardsAtStart=numCards, numPlayers=numPlayers, deckOptions=deckType);
+    gameState = GameState(numCardsAtStart=numCards, numPlayers=numPlayers, deckOptions=deckType, gameMode=gameMode);
     
     while (not(gameState.isTerminalState())):
         
@@ -60,7 +67,7 @@ def main():
             each player can have a set of actions they can take wether it's their turn or not, just with 
             a predefined order. 
         """
-        
+        print(gameState.players)
         for player in gameState.players:
             
             if (player.id == gameState.whoseTurn):
@@ -103,4 +110,4 @@ def logResults(gameState: GameState):
             print("Player %d had %d cards left!" % (player.id, len(player.cardsInHand)))
 
 if __name__ == "__main__":
-    main();
+    main()

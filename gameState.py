@@ -14,7 +14,7 @@ DRAW_2_ONLY_DECK = 4;
 
 class GameState:
     
-    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7, deckOptions=0):
+    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7, deckOptions=0, gameMode="random"):
         
         if (deckOptions == WILDS_ONLY_DECK):
             self.deck = CardDeck(standardDeck=False, wilds=True);
@@ -34,10 +34,12 @@ class GameState:
         self.orderReversed = False;
         
         #List of all players in the game. 
-        self.players = list[Player]();
-        for i in range(numPlayers):
-            self.players.append(Player(i, HumanAgent()));
-            
+        self.players = [Player(0, HumanAgent())]
+        for i in range(1, numPlayers):
+            if gameMode == "random":
+                print(True)
+                self.players.append(Player(i, RandomAgent()))
+        
         #A dictionary containing the last action each player performed.
         self.lastPlayerAction = dict();
          
@@ -57,7 +59,8 @@ class GameState:
         houseRules = [];
         
         self.gameEvents = standardEvents + houseRules;
-        
+        self.lose = False
+        self.win = False
         
     def getLegalActions(self, playerID: int) -> list[PlayerAction]:
         
