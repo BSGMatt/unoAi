@@ -39,6 +39,8 @@ class GameState:
             if gameMode == "random":
                 print(True)
                 self.players.append(Player(i, RandomAgent()))
+            elif gameMode == "reflex":
+                self.players.append(Player(i, ReflexAgent()))
         
         #A dictionary containing the last action each player performed.
         self.lastPlayerAction = dict();
