@@ -13,10 +13,13 @@ class Player:
         self.agent = agent;
         self.id = id;
         self.cardsInHand = [];
-        
-    def makeAction(self, gameState) -> PlayerAction:
-        return self.agent.getAction(self.id, gameState);
-    
+        self.opponentCardLen = 0
+
+    def makeAction(self, gameState, opponentCardLen=None) -> PlayerAction:
+        if opponentCardLen is not None:
+            self.opponentCardLen = opponentCardLen
+            return self.agent.getAction(self.id, gameState, self.opponentCardLen)
+        return self.agent.getAction(self.id, gameState)
     
     """
         Force the player to pick between the given actions. 

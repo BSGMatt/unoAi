@@ -1,5 +1,6 @@
 
 from gameState import GameState
+import agents
 from actions import PlayerActionNames as Actions
 from player import *
 import sys
@@ -68,23 +69,36 @@ def main():
             a predefined order. 
         """
         print(gameState.players)
+        action = None
+        opponentCards = []
         for player in gameState.players:
-            
+            print("Player agent")
             if (player.id == gameState.whoseTurn):
                 print("");
+                #print("------------------------------------------------")
                 print("It's Player ", player.id,"'s Turn!!", sep="");
                 print("");
+                if type(player.agent) == agents.ReflexAgent:
+                    action = player.makeAction(gameState, len(opponentCards));
+                else:
+                    action = player.makeAction(gameState)
+                opponentCards = []
             else:
                 print("");
                 print("Player ", player.id,"'s Stats:", sep="");
-                print("");
-            
+                print("")
+                #print("------------------------------------------------")
+                opponentCards = player.cardsInHand
+                if (type(player.agent) == agents.ReflexAgent):
+                    action = player.makeAction(gameState, len(opponentCards));
+                else:
+                    action = player.makeAction(gameState)
+ 
+
+
             print("Top Card is a", gameState.deck.topCard);
             print("Player", player.id,"'s Hand:", player.cardsInHand);
-            
-            action = player.makeAction(gameState);
             gameState.lastPlayerAction[player.id] = action;
-            
 
         #Handle any events that have been triggered due to player actions.
         for event in gameState.gameEvents:
