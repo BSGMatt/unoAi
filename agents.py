@@ -1,4 +1,5 @@
 from playeraction import PlayerAction
+import random
 
 class Agent:
     
@@ -52,3 +53,33 @@ class HumanAgent(Agent):
             return actions[0];
         else:
             return actions[choiceInt];
+
+
+class RandomAgent(Agent):
+    def getAction(self, playerID: int, gameState):
+        playerActions = gameState.getLegalActions(playerID)
+
+        if len(playerActions) == 1:
+            return playerActions[0]
+
+        print("Here's your possible actions: ")
+
+        # Print out all of the player's actions.
+        for i in range(len(playerActions)):
+            print(i, playerActions[i])
+
+        print("Which action?\n")
+
+        return random.choice(playerActions)
+
+    def forceAction(self, playerID: int, gameState, actions: list[PlayerAction]):
+        if len(actions) == 0:
+            return PlayerAction("None", None)
+
+        print("Here's your possible actions: ")
+
+        # Print out all of the player's actions.
+        for i in range(len(actions)):
+            print(i, actions[i])
+
+        return random.choice(actions)
