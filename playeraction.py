@@ -22,3 +22,20 @@ class PlayerAction:
 
     def getCard(self):
         return self.card
+
+    def toString(self):
+        s = ""
+        if self.card == None:
+            s += (self.getActionName() + " " + "None")
+        else:
+            if self.card.color == 0:
+                s += (self.actionName + " RED " + str(self.card.value))
+            elif self.card.color == 1:
+                s += (self.actionName + " BLUE " + str(self.card.value))
+            elif self.card.color == 2:
+                s += (self.actionName + " GREEN " + str(self.card.value))
+            elif self.card.color == 3:
+                s += (self.actionName + " YELLOW " + str(self.card.value))
+            elif self.card.color == 4:
+                s += (self.actionName + " WILD_COLOR " + str(self.card.value))
+        return s

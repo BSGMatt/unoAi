@@ -1,5 +1,7 @@
 from playeraction import PlayerAction
 import random
+from collections import Counter
+
 
 class Agent:
 
@@ -110,39 +112,33 @@ class ReflexAgent(Agent):
 
         bestAction = None
         for action in playerActions:
-            #print("Action 0")
-            #print(action)
-            if action.getActionName() == "uno":
+            if action.actionName == "uno":
                 # Call UNO if it's a legal option
                 return action
-            elif action.getActionName() == "place":
+            elif action.actionName == "place":
                 # Prioritize playing cards if possible
                 bestAction = action
 
+        return bestAction
         # If no preferable action is found, draw a card if possible
         for action in playerActions:
-            if action.getActionName() == "draw":
+            if action.actionName == "draw":
                 return action
-            else:
-                print(action)
 
         return bestAction
 
-    def forceAction(self, playerID: int, gameState, actions: list[PlayerAction], opponentCardLen):
+    def forceAction(self, playerID: int, gameState, actions: list[PlayerAction]):
         if len(actions) == 0:
             return PlayerAction("None", None)
-        #print("Opponent card length: " + opponentCardLen)
+
         print("Here's your possible actions: ")
 
         # Print out all of the player's actions.
         for i in range(len(actions)):
             print(i, actions[i])
 
-
         return random.choice(actions)
 
-    def evaluate():
-        return None
 
 
 
@@ -179,12 +175,48 @@ class ReflexAgent2(Agent):
         3) playing big numbers 
         4) prioritize playing duplicate numbers  
         """                
+
+        print("Actions")
+        print(type(actions[0]))
+
+        # counter = float("-inf")
+        # num = 0
+        # for i in range(0, len(actions)):
+        #     actionFrequency = actions.count(i)
+        #     print("Action Frequency")
+        #     print(actionFrequency)
+        #     if(actionFrequency > counter):
+        #         counter = actionFrequency
+        #         num = i
+        # print("Num")
+        # print(num)
+        # return num
+        # return max(set(actions.card.value), key = actions.count)
+
         duplicate = -1
         wild = -1
         wild4 = -1
         draw2 = -1
         skip = -1
         reverse = -1
+
+
+        #print(counts)
+        if opponentLen > len(actions):
+            aList = []
+            for action in actions:
+                aList.append(action.toString())
+
+            print(aList)
+            counts = Counter(aList)
+            most_common_element = max(counts, key=counts.get)
+            most_common_index = 0
+            if counts[most_common_element] == 1:
+                most_common_index = aList.index(most_common_element)
+                most_common_index += 1
+            i = most_common_index
+            duplicate = i
+            return duplicate
 
         for i, action in enumerate(actions): 
             if action.getActionName() == "+4" and action.getCard() == "WILD":
@@ -210,6 +242,19 @@ class ReflexAgent2(Agent):
                     largestI = i
         print("Largest")
         print(largestI)
+
+
+        if len(actions) <= 3:
+            if wild != -1:
+                return wild
+            elif wild4 != -1:
+                return wild4
+            elif draw2 != -1:
+                return draw2
+            elif reverse != -1:
+                return reverse
+            elif skip != -1:
+                return skip
 
         if opponentLen <= 4:
             if wild4 != -1:

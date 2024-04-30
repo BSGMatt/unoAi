@@ -78,7 +78,7 @@ def main():
                 #print("------------------------------------------------")
                 print("It's Player ", player.id,"'s Turn!!", sep="");
                 print("");
-                if type(player.agent) == agents.ReflexAgent2:
+                if type(player.agent) == agents.ReflexAgent:
                     action = player.makeAction(gameState, len(opponentCards));
                 else:
                     action = player.makeAction(gameState)
@@ -89,7 +89,7 @@ def main():
                 print("")
                 #print("------------------------------------------------")
                 opponentCards = player.cardsInHand
-                if (type(player.agent) == agents.ReflexAgent2):
+                if (type(player.agent) == agents.ReflexAgent):
                     action = player.makeAction(gameState, len(opponentCards));
                 else:
                     action = player.makeAction(gameState)

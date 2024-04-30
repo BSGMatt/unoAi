@@ -48,6 +48,11 @@ class Card:
     def __repr__(self) -> str:
         return self.__str__();
 
+    def getColor(self):
+        return self.color
+    def getValue(self):
+        return self.value
+
         
 
 class CardDeck:
