@@ -14,7 +14,15 @@ DRAW_2_ONLY_DECK = 4
 
 class GameState:
 
-    def __init__(self, numPlayers=2, houseRules=[], numCardsAtStart=7, deckOptions=0):
+    def __init__(
+        self,
+        numPlayers=2,
+        houseRules=[],
+        numCardsAtStart=7,
+        deckOptions=0,
+        gameMode="random",
+        numHumanAgents=1,
+    ):
 
         if deckOptions == WILDS_ONLY_DECK:
             self.deck = CardDeck(standardDeck=False, wilds=True)
@@ -34,9 +42,19 @@ class GameState:
         self.orderReversed = False
 
         # List of all players in the game.
-        self.players = list[Player]()
-        for i in range(numPlayers):
+
+        # Check if this game should include a human-controlled agent.
+        self.players = []
+
+        for i in range(0, numHumanAgents):
             self.players.append(Player(i, HumanAgent()))
+
+        for i in range(numHumanAgents, numPlayers):
+            if gameMode == "random":
+                print(True)
+                self.players.append(Player(i, RandomAgent()))
+            elif gameMode == "reflex":
+                self.players.append(Player(i, ReflexAgent2()))
 
         # A dictionary containing the last action each player performed.
         self.lastPlayerAction = dict()
@@ -53,7 +71,6 @@ class GameState:
         """
         # standardEvents  = [UnoCalledEvent(), DrawCardEvent(), PlaceCardEvent(), SkipEvent(), WildEvent()]
         standardEvents = [
-            UnoCalledEvent(0),
             DrawCardEvent(1),
             PlaceCardEvent(2),
             SkipEvent(3),
@@ -65,6 +82,8 @@ class GameState:
         houseRules = []
 
         self.gameEvents = standardEvents + houseRules
+        self.lose = False
+        self.win = False
 
     def getLegalActions(self, playerID: int) -> list[PlayerAction]:
 
@@ -78,22 +97,21 @@ class GameState:
                 if self.deck.topCard.isMatch(card):
                     ret.append(PlayerAction(PlayerActionNames.PLACE, card))
 
-            # Check if a player is on their second to last card.
-            if len(self.players[playerID].cardsInHand) == 2:
+            """
+            #Check if a player is on their second to last card. 
+            if (len(self.players[playerID].cardsInHand) == 2):
                 cards = self.players[playerID].cardsInHand
-                # Check if the last any of last two cards are a match.
-                if self.deck.topCard.isMatch(cards[0]) or self.deck.topCard.isMatch(
-                    cards[1]
-                ):
-                    ret.append(PlayerAction(PlayerActionNames.UNO, None))
-
-        else:
-            # Check if other players are going to call UNO.
+                #Check if the last any of last two cards are a match. 
+                if (self.deck.topCard.isMatch(cards[0]) or self.deck.topCard.isMatch(cards[1])):
+                    ret.append(PlayerAction(PlayerActionNames.UNO, None));
+            """
+            """
+            #Check if other players are going to call UNO.  
             for player in self.players:
-                if player.id != playerID and self.playerisReadyToCallUNO(player.id):
-                    ret.append(PlayerAction(PlayerActionNames.UNO, None))
-                    break
-                    # Only need one uno action.
+                if (player.id != playerID and self.playerisReadyToCallUNO(player.id)):
+                    ret.append(PlayerAction(PlayerActionNames.UNO, None));
+                    break; #Only need one uno action. 
+            """
 
         # If there is no possible actions a player can take, then return the 'None' Action.
         if len(ret) == 0:

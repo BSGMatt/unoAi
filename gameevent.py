@@ -143,6 +143,7 @@ class UnoCalledEvent(GameEvent):
     def eventOccured(self, gameState) -> bool:
         
         for player in gameState.players:
+            print(player.id, "'s Last Action was:", gameState.lastPlayerAction[player.id].actionName)
             if (gameState.lastPlayerAction[player.id].actionName == pan.UNO):
                 self.playerWhoCalledId = player.id
                 return True;
@@ -175,6 +176,9 @@ class UnoCalledEvent(GameEvent):
             currentPlayer.cardsInHand.append(newCard);
             newCard = gameState.deck.drawCard();
             currentPlayer.cardsInHand.append(newCard); 
+            
+            #Set player's last action to 'None' to prevent players from calling UNO again. 
+            gameState.lastPlayerAction[currentPlayer.id] = PlayerAction(pan.NONE, None)
             
             #Prevent any events from occuring after uno has been called. 
             gameState.cancelFutureEvents(self);

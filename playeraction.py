@@ -16,3 +16,9 @@ class PlayerAction:
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def getActionName(self):
+        return self.actionName
+
+    def getCard(self):
+        return self.card
