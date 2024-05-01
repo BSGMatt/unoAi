@@ -68,7 +68,7 @@ def main():
             each player can have a set of actions they can take wether it's their turn or not, just with 
             a predefined order. 
         """
-        print(gameState.players)
+        #print(gameState.players)
         action = None
         opponentCards = []
         for player in gameState.players:
@@ -87,19 +87,21 @@ def main():
                     action = player.makeAction(gameState)
                 opponentCards = []
                 print("Player took action:", action)
+                input("");
             else:
-                print("");
+                #print("");
                 print("------------------------------------------------")
                 print("Player ", player.id,"'s Stats:", sep="");
-                print("")
-                print("Top Card is a", gameState.deck.topCard);
+                #print("")
+                #print("Top Card is a", gameState.deck.topCard);
                 print("Player", player.id,"'s Hand:", player.cardsInHand);
                 opponentCards = player.cardsInHand
                 if (type(player.agent) == agents.ReflexAgent2):
                     action = player.makeAction(gameState, len(opponentCards));
                 else:
                     action = player.makeAction(gameState)
-                print("Player took action:", action)
+                #print("Player took action:", action)
+                input("");
             
             gameState.lastPlayerAction[player.id] = action;
 
@@ -109,7 +111,7 @@ def main():
         
         for event in gameState.gameEvents:
             if (not(event.ignore) and event.eventOccured(gameState)):
-                print ("A", event.name, "has occured!");
+                #print ("A", event.name, "has occured!");
                 event.modifyGameState(gameState);
             event.ignore = False;
                 
@@ -134,54 +136,40 @@ def runGame(initalGameState: GameState) -> Player:
             each player can have a set of actions they can take wether it's their turn or not, just with 
             a predefined order. 
         """
-        print(gameState.players)
+        #print(gameState.players)
         action = None
         opponentCards = []
-        for player in gameState.players:
-            print("Player agent")
-            
+        for player in gameState.players:         
             if (player.id == gameState.whoseTurn):
-                print("");
-                print("------------------------------------------------")
-                print("It's Player ", player.id,"'s Turn!!", sep="");
-                print("");
-                print("Top Card is a", gameState.deck.topCard);
-                print("Player", player.id,"'s Hand:", player.cardsInHand);
                 if type(player.agent) == agents.ReflexAgent2:
                     action = player.makeAction(gameState, len(opponentCards));
                 else:
                     action = player.makeAction(gameState)
                 opponentCards = []
-                print("Player took action:", action)
+                #print("Player took action:", action)
             else:
-                print("");
-                print("------------------------------------------------")
-                print("Player ", player.id,"'s Stats:", sep="");
-                print("")
-                print("Top Card is a", gameState.deck.topCard);
-                print("Player", player.id,"'s Hand:", player.cardsInHand);
                 opponentCards = player.cardsInHand
                 if (type(player.agent) == agents.ReflexAgent2):
                     action = player.makeAction(gameState, len(opponentCards));
                 else:
                     action = player.makeAction(gameState)
-                print("Player took action:", action)
+                #print("Player took action:", action)
             
             gameState.lastPlayerAction[player.id] = action;
 
         #Handle any events that have been triggered due to player actions.
         
-        print("------------------------------------------------")
+        #print("------------------------------------------------")
         
         for event in gameState.gameEvents:
             if (not(event.ignore) and event.eventOccured(gameState)):
-                print ("A", event.name, "has occured!");
+                #print ("A", event.name, "has occured!");
                 event.modifyGameState(gameState);
             event.ignore = False;
                 
 
         gameState.nextPlayer();
-        print("Next player will be:", gameState.whoseTurn);
+        #print("Next player will be:", gameState.whoseTurn);
                     
     winner = None;
     for player in gameState.players:

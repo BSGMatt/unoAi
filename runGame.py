@@ -2,6 +2,7 @@
     This script is runs a set number of uno games and tracks the winrates of each player. 
 '''
 import uno
+import time
 
 def runGames():
     
@@ -58,18 +59,29 @@ def runGames():
                 sys.exit();
             else:
                 gameMode = str(args[i+1])
+        if (args[i] == '--agentList'):
+            if (i + 1 >= len(args)):
+                print("Need to specify --gameMode! (i.e, --gameMode random or --gameMode reflex)");
+                sys.exit();
+            else:
+                gameMode = str(args[i+1])
                  
     gameLog = {};
 
     for i in range(numPlayers):
         gameLog[i] = 0;
 
+    runStartTime = time.time()
+
     for i in range(numGames):
         gameState = uno.GameState(numCardsAtStart=numCards, numPlayers=numPlayers, deckOptions=deckType, gameMode=gameMode, numHumanAgents=numHumans);
         gameLog[uno.runGame(gameState).id] += 1 / numGames;
         
     for id in list(gameLog.keys()):
-        print("Winrate for Player 0 was: ", gameLog[id]);
+        print("Winrate for Player", id, "was: ", gameLog[id]);
+        
+    endTime = time.time() - runStartTime;
+    print("Game(s) completed in ", endTime, "seconds.");
 
 
 runGames();
